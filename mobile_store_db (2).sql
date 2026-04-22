@@ -1,21 +1,9 @@
--- =============================================================================
--- Online Mobile Shopping Database
--- Database: mobile_store_db
--- =============================================================================
-
--- -----------------------------------------------------------------------------
--- 1. Create and use database
--- -----------------------------------------------------------------------------
 DROP DATABASE IF EXISTS mobile_store_db;
 CREATE DATABASE mobile_store_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
 USE mobile_store_db;
-
--- -----------------------------------------------------------------------------
--- 2. Tables (primary keys, foreign keys, NOT NULL, UNIQUE)
--- -----------------------------------------------------------------------------
 
 CREATE TABLE Customers (
   customer_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -79,10 +67,6 @@ CREATE TABLE Payments (
     ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- -----------------------------------------------------------------------------
--- 3. Sample data (at least 5 rows per table)
--- -----------------------------------------------------------------------------
-
 INSERT INTO Customers (name, email, phone, address) VALUES
   ('Ananya Sharma', 'ananya.sharma@gmail.com', '+91-9876504321', '12 MG Road, Bengaluru, Karnataka'),
   ('Rahul Verma', 'rahul.verma@outlook.com', '+91-9123456780', '45 Park Street, Kolkata, West Bengal'),
@@ -132,10 +116,6 @@ INSERT INTO Payments (order_id, payment_method, payment_status) VALUES
   (5, 'UPI', 'Completed'),
   (6, 'Wallet', 'Completed');
 
--- -----------------------------------------------------------------------------
--- 4. Views (at least 2)
--- -----------------------------------------------------------------------------
-
 CREATE OR REPLACE VIEW customer_orders AS
 SELECT
   c.customer_id,
@@ -158,22 +138,15 @@ FROM Order_Items oi
 INNER JOIN Mobiles m ON m.mobile_id = oi.mobile_id
 GROUP BY m.mobile_id, m.brand, m.model;
 
--- -----------------------------------------------------------------------------
--- 5. Example queries (SELECT, INNER JOIN, aggregates, subqueries)
--- -----------------------------------------------------------------------------
-
--- SELECT: all customers
 SELECT customer_id, name, email, phone
 FROM Customers
 ORDER BY name;
 
--- SELECT: mobiles in stock
 SELECT brand, model, price, stock
 FROM Mobiles
 WHERE stock > 0
 ORDER BY price DESC;
 
--- INNER JOIN: orders with customer names
 SELECT
   o.order_id,
   c.name AS customer_name,
@@ -183,7 +156,6 @@ FROM Orders o
 INNER JOIN Customers c ON c.customer_id = o.customer_id
 ORDER BY o.order_date DESC;
 
--- INNER JOIN: order line details
 SELECT
   o.order_id,
   c.name AS customer_name,
@@ -197,13 +169,11 @@ INNER JOIN Order_Items oi ON oi.order_id = o.order_id
 INNER JOIN Mobiles m ON m.mobile_id = oi.mobile_id
 ORDER BY o.order_id, oi.order_item_id;
 
--- Aggregate: total revenue from completed payments
 SELECT SUM(o.total_amount) AS total_revenue
 FROM Orders o
 INNER JOIN Payments p ON p.order_id = o.order_id
 WHERE p.payment_status = 'Completed';
 
--- Aggregate: order count per customer
 SELECT
   c.customer_id,
   c.name,
@@ -213,7 +183,6 @@ LEFT JOIN Orders o ON o.customer_id = c.customer_id
 GROUP BY c.customer_id, c.name
 ORDER BY order_count DESC;
 
--- Aggregate: average mobile price by brand
 SELECT
   brand,
   AVG(price) AS avg_price,
@@ -222,7 +191,6 @@ FROM Mobiles
 GROUP BY brand
 ORDER BY avg_price DESC;
 
--- Subquery: customers who spent above overall average order value
 SELECT c.name, o.total_amount
 FROM Orders o
 INNER JOIN Customers c ON c.customer_id = o.customer_id
@@ -230,7 +198,7 @@ WHERE o.total_amount > (
   SELECT AVG(total_amount) FROM Orders
 );
 
--- Subquery: mobiles priced higher than brand average (Samsung example)
+
 SELECT m.model, m.price
 FROM Mobiles m
 WHERE m.brand = 'Samsung'
@@ -238,7 +206,6 @@ WHERE m.brand = 'Samsung'
     SELECT AVG(m2.price) FROM Mobiles m2 WHERE m2.brand = 'Samsung'
   );
 
--- Subquery IN: orders that include Google Pixel models
 SELECT DISTINCT o.order_id, o.order_date, o.total_amount
 FROM Orders o
 WHERE o.order_id IN (
@@ -248,6 +215,5 @@ WHERE o.order_id IN (
   WHERE m.brand = 'Google'
 );
 
--- Views in use
 SELECT * FROM customer_orders ORDER BY order_date DESC;
 SELECT * FROM sales_summary ORDER BY revenue DESC;
